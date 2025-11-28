@@ -6,6 +6,7 @@ import { WagmiProvider, createConfig, http } from "wagmi";
 import { celo, celoAlfajores } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { injected } from "@wagmi/connectors";
+import { walletConnect } from "@wagmi/connectors";
 
 // If you want WalletConnect/Coinbase later, add them back and install their SDKs.
 
@@ -14,6 +15,10 @@ const config = createConfig({
   chains: [celoAlfajores, celo],
   connectors: [
     injected({ shimDisconnect: true }),
+    walletConnect({
+      projectId: process.env.NEXT_PUBLIC_WC_PROJECT_ID || "demo",
+      showQrModal: true,
+    }),
   ],
   transports: {
     [celoAlfajores.id]: http(),
