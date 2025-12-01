@@ -26,7 +26,19 @@ contract SavingsCircle is Ownable, ReentrancyGuard {
     mapping(uint256 => mapping(address => bool)) public paid; // cycle => member => paid?
     mapping(address => int256) public reputation; // simple score
 
+    // Membership requests (SelfID gating)
+    struct MembershipRequest {
+        bytes32 selfIdRef;
+        bool exists;
+        bool approved;
+    }
+
+    mapping(address => MembershipRequest) public membershipRequests;
+    mapping(address => bytes32) public membershipAttestations;
+
     // Events
+    event MembershipRequested(address indexed account, bytes32 selfIdRef);
+    event MembershipAttested(address indexed account, bytes32 attestationRef);
     event Joined(address indexed member);
     event Contributed(address indexed member, uint256 indexed cycle, uint256 amount);
     event Payout(address indexed to, uint256 indexed cycle, uint256 amount);
@@ -36,6 +48,8 @@ contract SavingsCircle is Ownable, ReentrancyGuard {
     error NotMember();
     error AlreadyMember();
     error InvalidParams();
+    error NoRequest();
+    error AlreadyRequested();
 
     constructor(
         address _cUSD,
@@ -62,12 +76,36 @@ contract SavingsCircle is Ownable, ReentrancyGuard {
         return memberIndex[account] != 0;
     }
 
-    function joinCircle(address account) external onlyOwner {
-        if (account == address(0)) revert InvalidParams();
+    function joinCircle(bytes32 selfIdRef) external {
+        if (selfIdRef == bytes32(0)) revert InvalidParams();
+        if (isMember(msg.sender)) revert AlreadyMember();
+        if (members.length >= maxMembers) revert InvalidParams();
+
+        MembershipRequest storage request = membershipRequests[msg.sender];
+        if (request.exists && !request.approved) {
+            revert AlreadyRequested();
+        }
+
+        membershipRequests[msg.sender] = MembershipRequest({selfIdRef: selfIdRef, exists: true, approved: false});
+        emit MembershipRequested(msg.sender, selfIdRef);
+    }
+
+    function attestMembership(address account, bytes32 attestationRef) external onlyOwner {
+        if (account == address(0) || attestationRef == bytes32(0)) revert InvalidParams();
         if (isMember(account)) revert AlreadyMember();
         if (members.length >= maxMembers) revert InvalidParams();
+
+        MembershipRequest storage request = membershipRequests[account];
+        if (!request.exists) revert NoRequest();
+        if (request.approved) revert AlreadyMember();
+
+        request.approved = true;
+        membershipAttestations[account] = attestationRef;
+
         members.push(account);
-        memberIndex[account] = members.length; // 1-based
+        memberIndex[account] = members.length;
+
+        emit MembershipAttested(account, attestationRef);
         emit Joined(account);
     }
 
@@ -105,6 +143,15 @@ contract SavingsCircle is Ownable, ReentrancyGuard {
         currentCycle += 1;
         _updateReputation(recipient, 3); // completed a payout cycle
         currentDueIndex = (currentDueIndex + 1) % payoutOrder.length;
+    }
+
+    function skipMissedContribution(address member) external onlyOwner {
+        if (!isMember(member)) revert NotMember();
+        if (paid[currentCycle][member]) revert InvalidParams();
+
+        paid[currentCycle][member] = true;
+        emit Missed(member, currentCycle);
+        _updateReputation(member, -1);
     }
 
     function getStatus()
