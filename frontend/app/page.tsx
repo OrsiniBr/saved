@@ -1,7 +1,7 @@
 "use client";
 
 import { useAccount, useChainId } from "wagmi";
-import { celo, celoAlfajores } from "wagmi/chains";
+import { celo } from "wagmi/chains";
 import { HeroSection } from "./components/landing/HeroSection";
 import { StatsRow } from "./components/landing/StatsRow";
 import { HowItWorksSection } from "./components/landing/HowItWorksSection";
@@ -10,8 +10,7 @@ import { ExperienceSection } from "./components/landing/ExperienceSection";
 export default function Home() {
   const { isConnected } = useAccount();
   const chainId = useChainId();
-  const onSupportedChain =
-    typeof chainId === "number" && (chainId === celoAlfajores.id || chainId === celo.id);
+  const onSupportedChain = typeof chainId === "number" && chainId === celo.id;
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-slate-950 text-white">
