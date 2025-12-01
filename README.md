@@ -57,7 +57,7 @@ A decentralized savings circle platform built on Celo using cUSD, integrated wit
 - [ ] SavingsCircleFactory.sol
   - [x] `createCircle(params)` deploys new `SavingsCircle`
   - [x] Emit `CircleCreated(circle, creator, params)`
-  - [ ] Registry mapping for discoverability
+  - [x] Registry mapping for discoverability
 - [ ] SavingsCircle.sol
   - State:
     - [x] `address[] members`, `mapping(address => uint256) memberIndex`

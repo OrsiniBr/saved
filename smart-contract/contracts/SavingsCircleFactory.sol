@@ -15,6 +15,8 @@ contract SavingsCircleFactory {
     );
 
     address public immutable cUSD;
+    address[] public allCircles;
+    mapping(address => address[]) public creatorCircles;
 
     constructor(address _cUSD) {
         require(_cUSD != address(0), "invalid cUSD");
@@ -38,5 +40,12 @@ contract SavingsCircleFactory {
             )
         );
         emit CircleCreated(circle, msg.sender, cUSD, contributionAmount, cycleLength, maxMembers);
+
+        allCircles.push(circle);
+        creatorCircles[msg.sender].push(circle);
+    }
+
+    function totalCircles() external view returns (uint256) {
+        return allCircles.length;
     }
 }
