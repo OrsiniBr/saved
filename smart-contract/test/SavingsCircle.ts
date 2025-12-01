@@ -6,7 +6,6 @@ import { padHex } from "viem";
 
 describe("SavingsCircle", async () => {
   const { viem } = await network.connect();
-  const publicClient = await viem.getPublicClient();
   const [creator, memberA, memberB] = await viem.getWalletClients();
 
   const contribution = 100n * 10n ** 18n;
