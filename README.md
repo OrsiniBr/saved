@@ -55,8 +55,8 @@ A decentralized savings circle platform built on Celo using cUSD, integrated wit
 - [x] Interfaces:
   - [x] `IERC20` for cUSD
 - [ ] SavingsCircleFactory.sol
-  - [ ] `createCircle(params)` deploys new `SavingsCircle`
-  - [ ] Emit `CircleCreated(circle, creator, params)`
+  - [x] `createCircle(params)` deploys new `SavingsCircle`
+  - [x] Emit `CircleCreated(circle, creator, params)`
   - [ ] Registry mapping for discoverability
 - [ ] SavingsCircle.sol
   - State:
@@ -67,14 +67,14 @@ A decentralized savings circle platform built on Celo using cUSD, integrated wit
     - [x] `uint256[] payoutOrder`
     - [x] `mapping(address => int256) reputation`
   - Functions:
-    - [ ] `constructor(params)`
+    - [x] `constructor(params)`
     - [ ] `joinCircle(selfIdRef)` with membership gating
     - [ ] `attestMembership(selfIdRefHash)` (creator-only) [MVP: event log + off-chain Self attestation]
-    - [ ] `contribute()` pulls cUSD (after user approve), marks `paid`
-    - [ ] `triggerPayout()` checks due member and transfers pooled cUSD; incentive to caller
+    - [x] `contribute()` pulls cUSD (after user approve), marks `paid`
+    - [x] `triggerPayout()` checks due member and transfers pooled cUSD; incentive to caller
     - [ ] `skipMissedContribution(member)` marks missed after grace window
-    - [ ] `updateReputation(member, delta)` internal hooks
-    - [ ] `getStatus()` view for UI
+    - [x] `updateReputation(member, delta)` internal hooks
+    - [x] `getStatus()` view for UI
   - Events:
     - [x] `Joined(member)`, `Contributed(member, cycle, amount)`, `Payout(to, cycle, amount)`, `Missed(member, cycle)`, `ReputationUpdated(member, delta, score)`
 - [x] Security & Constraints:
