@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useAccount, useChainId } from "wagmi";
 import { celo } from "wagmi/chains";
 
@@ -15,6 +16,7 @@ import {
   type SummaryMetric,
 } from "./components";
 import { useCirclesData } from "./useCirclesData";
+import { CreateCircleDialog } from "./CreateCircleDialog";
 
 const summarySkeleton: SummaryMetric[] = [
   { label: "Total value rotating", value: "…", delta: "" },
@@ -27,6 +29,7 @@ export default function DashboardPage() {
   const chainId = useChainId();
   const onCeloMainnet = typeof chainId === "number" && chainId === celo.id;
   const { circles, aggregate, activities, contributions, isLoading, isError, refetch } = useCirclesData();
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   const summaryMetrics: SummaryMetric[] = [
     {
@@ -63,7 +66,7 @@ export default function DashboardPage() {
             <h1 className="mt-2 text-4xl font-semibold">Your savings circles</h1>
           </div>
           <div className="flex flex-wrap gap-3">
-            <ActionButton label="Create circle" />
+            <ActionButton label="Create circle" onClick={() => setShowCreateDialog(true)} />
             <ActionButton label="Invite member" />
           </div>
         </header>
@@ -101,6 +104,11 @@ export default function DashboardPage() {
           <ActivityTimeline items={activities as ActivityItem[]} />
         </section>
       </div>
+      <CreateCircleDialog
+        open={showCreateDialog}
+        onClose={() => setShowCreateDialog(false)}
+        onCreated={() => refetch()}
+      />
     </main>
   );
 }

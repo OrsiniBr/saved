@@ -1,12 +1,13 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { formatUnits, parseAbi, parseAbiItem } from "viem";
-import { type PublicClient } from "viem";
+import { formatUnits, type PublicClient } from "viem";
 import { useAccount, useConfig, usePublicClient } from "wagmi";
 import { readContract } from "wagmi/actions";
 
 import type { ActivityItem, CircleSnapshot, ContributionEntry } from "./components";
+import { ACTIVITY_LOOKBACK_BLOCKS, FACTORY_ADDRESS } from "./config";
+import { circleAbi, circleCreatedEvent, contributedEvent, factoryAbi, payoutEvent } from "./abi";
 
 type DashboardQueryPayload = {
   circles: CircleSnapshot[];
@@ -18,35 +19,8 @@ type DashboardQueryPayload = {
   contributions: ContributionEntry[];
 };
 
-const factoryAddress = process.env.NEXT_PUBLIC_FACTORY_ADDRESS as `0x${string}` | undefined;
-
-if (!factoryAddress) {
-  throw new Error("NEXT_PUBLIC_FACTORY_ADDRESS is required to load dashboard data");
-}
-
-const lookbackBlocks = BigInt(process.env.NEXT_PUBLIC_ACTIVITY_LOOKBACK_BLOCKS ?? "20000");
-
 type ActivityWithMeta = ActivityItem & { blockNumber?: bigint };
 type ContributionWithMeta = ContributionEntry & { blockNumber?: bigint };
-
-const factoryAbi = parseAbi([
-  "function totalCircles() view returns (uint256)",
-  "function allCircles(uint256) view returns (address circle)",
-]);
-const circleAbi = parseAbi([
-  "function getStatus() view returns (uint256 currentCycle, uint256 currentDueIndex, uint256 contributionAmount, uint256 totalMembers)",
-  "function maxMembers() view returns (uint256)",
-  "function members(uint256) view returns (address)",
-  "function payoutOrder(uint256) view returns (uint256)",
-]);
-
-const circleCreatedEvent = parseAbiItem(
-  "event CircleCreated(address indexed circle, address indexed creator, address cUSD, uint256 contributionAmount, uint256 cycleLength, uint256 maxMembers)"
-);
-const contributedEvent = parseAbiItem(
-  "event Contributed(address indexed member, uint256 indexed cycle, uint256 amount)"
-);
-const payoutEvent = parseAbiItem("event Payout(address indexed to, uint256 indexed cycle, uint256 amount)");
 
 function formatAddress(address?: string) {
   if (!address) return "TBD";
@@ -132,12 +106,12 @@ export function useCirclesData() {
   const publicClient = usePublicClient();
 
   const query = useQuery({
-    queryKey: ["circles", factoryAddress],
+    queryKey: ["circles", FACTORY_ADDRESS],
     enabled: Boolean(config) && isConnected,
     staleTime: 30_000,
     queryFn: async (): Promise<DashboardQueryPayload> => {
       const totalCircles = await readContract(config, {
-        address: factoryAddress,
+        address: FACTORY_ADDRESS,
         abi: factoryAbi,
         functionName: "totalCircles",
       });
@@ -155,7 +129,7 @@ export function useCirclesData() {
       const circleAddresses = await Promise.all(
         Array.from({ length: totalAsNumber }, (_, i) =>
           readContract(config, {
-            address: factoryAddress,
+            address: FACTORY_ADDRESS,
             abi: factoryAbi,
             functionName: "allCircles",
             args: [BigInt(i)],
@@ -180,7 +154,7 @@ export function useCirclesData() {
       }
 
       const toBlock = await publicClient.getBlockNumber();
-      const fromBlock = toBlock > lookbackBlocks ? toBlock - lookbackBlocks : 0n;
+      const fromBlock = toBlock > ACTIVITY_LOOKBACK_BLOCKS ? toBlock - ACTIVITY_LOOKBACK_BLOCKS : 0n;
 
       const factoryActivities = await fetchFactoryActivities(publicClient, fromBlock, toBlock);
 
