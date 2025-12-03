@@ -8,6 +8,7 @@ import { readContract } from "wagmi/actions";
 import type { ActivityItem, CircleSnapshot, ContributionEntry } from "./components";
 import { ACTIVITY_LOOKBACK_BLOCKS, FACTORY_ADDRESS } from "./config";
 import { circleAbi, circleCreatedEvent, contributedEvent, factoryAbi, payoutEvent } from "./abi";
+import { getAllCircleLabels } from "./circleRegistry";
 
 type DashboardQueryPayload = {
   circles: CircleSnapshot[];
@@ -141,16 +142,22 @@ export function useCirclesData() {
         circleAddresses.map((address, idx) => loadCircleSnapshot(config, address as `0x${string}`, idx))
       );
 
+      const registry = getAllCircleLabels();
+      const labeledSnapshots = snapshots.map((snapshot, idx) => {
+        const maybeLabel = registry[(circleAddresses[idx] as string)?.toLowerCase?.() ?? ""];
+        return maybeLabel ? { ...snapshot, name: maybeLabel } : snapshot;
+      });
+
       const aggregate = {
-        totalCircles: snapshots.length,
-        headlineValue: snapshots.reduce((sum, circle) => {
+        totalCircles: labeledSnapshots.length,
+        headlineValue: labeledSnapshots.reduce((sum, circle) => {
           const numericMatch = Number(circle.contribution.split(" ")[0]) || 0;
           return sum + numericMatch;
         }, 0),
       };
 
       if (!publicClient) {
-        return { circles: snapshots, aggregate, activities: [], contributions: [] };
+        return { circles: labeledSnapshots, aggregate, activities: [], contributions: [] };
       }
 
       const toBlock = await publicClient.getBlockNumber();
@@ -183,7 +190,7 @@ export function useCirclesData() {
         }));
 
       return {
-        circles: snapshots,
+        circles: labeledSnapshots,
         aggregate,
         activities: flatActivities,
         contributions: flatContributions,
