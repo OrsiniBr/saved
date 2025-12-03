@@ -6,7 +6,8 @@
     "clean": "rimraf artifacts cache types dist || true",
     "build": "hardhat compile",
     "test": "hardhat test",
-    "deploy:alfajores": "hardhat ignition deploy ignition/modules/Factory.ts --network alfajores"
+    "deploy:alfajores": "hardhat ignition deploy ignition/modules/Factory.ts --network alfajores",
+    "deploy:celo": "hardhat ignition deploy ignition/modules/Factory.ts --network celo"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-ignition": "^3.0.5",

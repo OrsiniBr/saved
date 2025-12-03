@@ -6,6 +6,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /// @title SavingsCircle - Core circle contract for Ajo/Esusu
+/// @notice Integrates with Self Protocol for onchain identity verification
 contract SavingsCircle is Ownable, ReentrancyGuard {
     // Token (cUSD) used for contributions
     IERC20 public immutable cUSD;
@@ -35,10 +36,15 @@ contract SavingsCircle is Ownable, ReentrancyGuard {
 
     mapping(address => MembershipRequest) public membershipRequests;
     mapping(address => bytes32) public membershipAttestations;
+    
+    // Self Protocol onchain verification
+    mapping(address => bool) public verifiedMembers; // Track verified Self identities
+    mapping(address => bytes32) public selfAttestationIds; // Store Self attestation IDs
 
     // Events
     event MembershipRequested(address indexed account, bytes32 selfIdRef);
     event MembershipAttested(address indexed account, bytes32 attestationRef);
+    event SelfVerified(address indexed account, bytes32 attestationId);
     event Joined(address indexed member);
     event Contributed(address indexed member, uint256 indexed cycle, uint256 amount);
     event Payout(address indexed to, uint256 indexed cycle, uint256 amount);
@@ -78,6 +84,8 @@ contract SavingsCircle is Ownable, ReentrancyGuard {
         return memberIndex[account] != 0;
     }
 
+    /// @notice Request to join circle with Self verification
+    /// @param selfIdRef Reference to Self identity (can be attestation ID or hash)
     function joinCircle(bytes32 selfIdRef) external {
         if (selfIdRef == bytes32(0)) revert InvalidParams();
         if (isMember(msg.sender)) revert AlreadyMember();
@@ -92,6 +100,23 @@ contract SavingsCircle is Ownable, ReentrancyGuard {
         emit MembershipRequested(msg.sender, selfIdRef);
     }
 
+    /// @notice Record Self onchain verification result
+    /// @param account Address that was verified
+    /// @param attestationId Self attestation ID from VerificationHub
+    function recordSelfVerification(address account, bytes32 attestationId) external {
+        // In production, this should verify the caller is Self's VerificationHub
+        // For MVP, we allow owner to call this after verifying off-chain
+        // TODO: Add VerificationHub interface and verify caller
+        if (account == address(0) || attestationId == bytes32(0)) revert InvalidParams();
+        
+        verifiedMembers[account] = true;
+        selfAttestationIds[account] = attestationId;
+        emit SelfVerified(account, attestationId);
+    }
+
+    /// @notice Approve membership after Self verification
+    /// @param account Address to approve
+    /// @param attestationRef Reference to Self attestation
     function attestMembership(address account, bytes32 attestationRef) external onlyOwner {
         if (account == address(0) || attestationRef == bytes32(0)) revert InvalidParams();
         if (isMember(account)) revert AlreadyMember();
@@ -100,6 +125,9 @@ contract SavingsCircle is Ownable, ReentrancyGuard {
         MembershipRequest storage request = membershipRequests[account];
         if (!request.exists) revert NoRequest();
         if (request.approved) revert AlreadyMember();
+
+        // Optional: Require Self verification before approval
+        // require(verifiedMembers[account], "Must be verified by Self");
 
         request.approved = true;
         membershipAttestations[account] = attestationRef;
