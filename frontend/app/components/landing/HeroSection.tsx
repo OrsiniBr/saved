@@ -16,20 +16,20 @@ export function HeroSection({
   onSupportedChain: boolean;
 }) {
   return (
-    <motion.header className="flex flex-col gap-10" {...fadeUp}>
+    <motion.header className="flex flex-col gap-10 pt-4 sm:pt-8" {...fadeUp}>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-[0.4em] text-cyan-300">Self-enabled circles</p>
-          <h1 className="mt-3 text-4xl font-semibold leading-tight text-slate-50 sm:text-5xl">
+          <h1 className="mt-3 max-w-3xl bg-gradient-to-r from-slate-50 via-cyan-100 to-emerald-100 bg-clip-text text-4xl font-semibold leading-tight text-transparent sm:text-5xl">
             Trust-first group savings for every community on Celo
           </h1>
         </div>
         <AppKitButton />
       </div>
 
-      <div className="grid gap-8 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="grid gap-8 rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.85)] backdrop-blur-xl lg:grid-cols-[1.1fr_0.9fr] lg:p-8">
         <div className="flex flex-col gap-6">
-          <p className="text-lg text-slate-200">
+          <p className="max-w-xl text-base leading-relaxed text-slate-200 sm:text-lg">
             Create verifiable Ajo/Esusu circles, rotate payouts on-chain, and grow shareable
             reputation—all in one elegant flow built for low fees and high trust.
           </p>
