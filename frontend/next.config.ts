@@ -1,9 +1,9 @@
 const nextConfig = {
   // Disable React Strict Mode to avoid double rendering in development
-  reactStrictMode: false,
+  reactStrictMode: true,
   
   // Configure webpack to handle module resolution issues
-  webpack: (config, { isServer }) => {
+  webpack: (config: any, { isServer }: { isServer: boolean }) => {
     // Ignore test files and other problematic modules (warnings only)
     config.ignoreWarnings = [
       { module: /node_modules\/thread-stream/ },
@@ -41,23 +41,8 @@ const nextConfig = {
     return config;
   },
   
-  // Disable Turbopack for now due to compatibility issues
-  experimental: {
-    turbo: false,
-  },
-  
   // Add support for static exports if needed
   output: 'standalone',
-  
-  // Configure TypeScript to ignore build errors for now
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  
-  // Configure ESLint to ignore during builds
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
 };
 
 export default nextConfig;
