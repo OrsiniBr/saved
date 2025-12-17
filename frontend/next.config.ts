@@ -17,10 +17,12 @@ const nextConfig = {
     if (!config.module) {
       config.module = { rules: [] };
     }
-    config.module.rules.push({
-      test: /thread-stream[\\/](test|pkg)[\\/].*\.(js|mjs|ts|tsx)$/,
-      use: 'ignore-loader',
-    });
+    if (config.module.rules) {
+      config.module.rules.push({
+        test: /thread-stream[\\/](test|pkg)[\\/].*\.(js|mjs|ts|tsx)$/,
+        use: 'ignore-loader',
+      });
+    }
 
     // Stub out tap/tape/why-is-node-running/porto used only in those tests/connectors
     if (!config.resolve) {
