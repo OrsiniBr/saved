@@ -1,9 +1,11 @@
+import type { Configuration } from 'webpack';
+
 const nextConfig = {
   // Disable React Strict Mode to avoid double rendering in development
   reactStrictMode: true,
   
   // Configure webpack to handle module resolution issues
-  webpack: (config: any, { isServer }: { isServer: boolean }) => {
+  webpack: (config: Configuration, { isServer }: { isServer: boolean }) => {
     // Ignore test files and other problematic modules (warnings only)
     config.ignoreWarnings = [
       { module: /node_modules\/thread-stream/ },
@@ -17,12 +19,13 @@ const nextConfig = {
       use: 'ignore-loader',
     });
 
-    // Stub out tap/tape/why-is-node-running used only in those tests
+    // Stub out tap/tape/why-is-node-running/porto used only in those tests/connectors
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
       tap: false,
       tape: false,
       'why-is-node-running': false,
+      porto: false,
     };
 
     // Add fallbacks for Node.js core modules
