@@ -22,8 +22,8 @@ const selfBackendVerifier = new SelfBackendVerifier(
     excludedCountries: (
       process.env.NEXT_PUBLIC_SELF_EXCLUDED_COUNTRIES
         ? process.env.NEXT_PUBLIC_SELF_EXCLUDED_COUNTRIES.split(",").map(code => code.trim())
-        : ["IRN", "PRK", "RUS", "SYR"]
-    ),
+        : excludedCountriesList
+    ) as any,
     ofac: process.env.NEXT_PUBLIC_SELF_OFAC !== "false",
   }),
   "hex" // userIdentifierType - must match frontend userIdType
