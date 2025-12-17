@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { SelfBackendVerifier, AllIds, DefaultConfigStore } from "@selfxyz/core";
 
-// Country codes are 3-letter ISO strings; we alias to string for typing here.
-type Country3LetterCode = string;
+// Use any to bypass the type checking issue since Self SDK's types are complex
+const excludedCountriesList = [
+  "IRN", "PRK", "RUS", "SYR"
+] as const;
 
 // Reuse a single verifier instance
 // Note: mockPassport: true = testnet/staging, false = mainnet
@@ -19,9 +21,9 @@ const selfBackendVerifier = new SelfBackendVerifier(
     minimumAge: parseInt(process.env.NEXT_PUBLIC_SELF_MIN_AGE || "18"),
     excludedCountries: (
       process.env.NEXT_PUBLIC_SELF_EXCLUDED_COUNTRIES
-        ? process.env.NEXT_PUBLIC_SELF_EXCLUDED_COUNTRIES.split(",")
-        : ["IRN", "PRK", "RUS", "SYR"]
-    ) as Country3LetterCode[],
+        ? process.env.NEXT_PUBLIC_SELF_EXCLUDED_COUNTRIES.split(",").map(code => code.trim())
+        : excludedCountriesList
+    ) as any,
     ofac: process.env.NEXT_PUBLIC_SELF_OFAC !== "false",
   }),
   "hex" // userIdentifierType - must match frontend userIdType
