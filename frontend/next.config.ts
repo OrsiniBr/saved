@@ -20,6 +20,9 @@ const nextConfig = {
     });
 
     // Stub out tap/tape/why-is-node-running/porto used only in those tests/connectors
+    if (!config.resolve) {
+      config.resolve = {};
+    }
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
       tap: false,
@@ -30,6 +33,9 @@ const nextConfig = {
 
     // Add fallbacks for Node.js core modules
     if (!isServer) {
+      if (!config.resolve) {
+        config.resolve = {};
+      }
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
