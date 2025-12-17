@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { SelfBackendVerifier, AllIds, DefaultConfigStore } from "@selfxyz/core";
 
-// Extract the Country3LetterCode type from DefaultConfigStore
-type ExtractCountryCode<T> = T extends { excludedCountries?: infer U } ? U : never;
-type Country3LetterCode = ExtractCountryCode<InstanceType<typeof DefaultConfigStore>["excludedCountries"]> extends (infer U)[] ? U : never;
+// Use any to bypass the type checking issue since Self SDK's types are complex
+const excludedCountriesList = [
+  "IRN", "PRK", "RUS", "SYR"
+] as const;
 
 // Reuse a single verifier instance
 // Note: mockPassport: true = testnet/staging, false = mainnet
