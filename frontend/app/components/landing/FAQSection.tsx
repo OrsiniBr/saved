@@ -1,6 +1,5 @@
 "use client";
-
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { SectionHeading } from "./ui";
@@ -44,7 +43,7 @@ export function FAQSection() {
   return (
     <motion.section
       id="faq"
-      className="space-y-8 py-20"
+      className="space-y-6 sm:space-y-8 py-12 sm:py-16 lg:py-20"
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
@@ -54,37 +53,62 @@ export function FAQSection() {
         title="Frequently asked questions"
         description="Everything you need to know about Ajo and group savings circles."
       />
-
-      <div className="space-y-4">
+      
+      <div className="space-y-3 sm:space-y-4 max-w-3xl mx-auto">
         {faqs.map((faq, index) => (
           <motion.div
             key={faq.question}
             className="rounded-xl border border-white/10 bg-white/5 transition hover:border-cyan-400/30"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
             transition={{ delay: index * 0.05 }}
           >
             <button
               onClick={() => setOpenIndex(openIndex === index ? null : index)}
-              className="flex w-full items-center justify-between px-6 py-4 text-left"
+              className="flex w-full items-center justify-between gap-4 px-4 sm:px-6 py-4 text-left"
+              aria-expanded={openIndex === index}
+              aria-controls={`faq-answer-${index}`}
             >
-              <h3 className="font-semibold text-white">{faq.question}</h3>
+              <h3 className="font-semibold text-white text-sm sm:text-base">
+                {faq.question}
+              </h3>
               <ChevronDown
-                className={`h-5 w-5 text-slate-400 transition ${openIndex === index ? "rotate-180" : ""}`}
+                className={`h-5 w-5 flex-shrink-0 text-slate-400 transition-transform duration-300 ${
+                  openIndex === index ? "rotate-180" : ""
+                }`}
               />
             </button>
-
-            {openIndex === index && (
-              <motion.div
-                className="border-t border-white/10 px-6 py-4"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-              >
-                <p className="text-sm text-slate-300">{faq.answer}</p>
-              </motion.div>
-            )}
+            
+            <AnimatePresence initial={false}>
+              {openIndex === index && (
+                <motion.div
+                  id={`faq-answer-${index}`}
+                  className="overflow-hidden border-t border-white/10"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ 
+                    opacity: 1, 
+                    height: "auto",
+                    transition: {
+                      height: { duration: 0.3, ease: "easeOut" },
+                      opacity: { duration: 0.2, delay: 0.1 }
+                    }
+                  }}
+                  exit={{ 
+                    opacity: 0, 
+                    height: 0,
+                    transition: {
+                      height: { duration: 0.3, ease: "easeIn" },
+                      opacity: { duration: 0.2 }
+                    }
+                  }}
+                >
+                  <p className="text-sm sm:text-base text-slate-300 px-4 sm:px-6 py-4 leading-relaxed">
+                    {faq.answer}
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         ))}
       </div>
