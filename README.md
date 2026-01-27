@@ -147,7 +147,7 @@ A decentralized savings circle platform built on Celo using Base, integrated wit
   - Self Protocol endpoints/keys
 
 ## Definition of Done (DoD)
-- Contracts deployed to Alfajores with tests >80% coverage on core flows.
+- Contracts deployed to celo with tests >80% coverage on core flows.
 - Web app deployed (preview + prod), usable on mobile.
 - Create/join/contribute/payout working end-to-end.
 - SelfID linking in-app; membership gating based on Self attestation.
